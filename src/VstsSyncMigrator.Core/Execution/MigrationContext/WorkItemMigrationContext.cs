@@ -266,12 +266,7 @@ namespace VstsSyncMigrator.Engine
             {
                 BuildFieldTable(oldWi, history);
             }
-
-            if (_config.AppendMigrationToolSignatureFooter)
-            {
-                AppendMigratedByFooter(history);
-            }
-
+          
             newwit.History = history.ToString();
 
             fieldMappingTimer.Stop();
@@ -284,12 +279,6 @@ namespace VstsSyncMigrator.Engine
         {
             Regex r = new Regex(wordToReplace, RegexOptions.IgnoreCase);
             return r.Replace(input, replaceWith, 1);
-        }
-
-
-        private static void AppendMigratedByFooter(StringBuilder history)
-        {
-            history.Append("<p>Migrated by <a href='https://dev.azure.com/nkdagility/migration-tools/'>Azure DevOps Migration Tools</a> open source.</p>");
         }
 
         private static void BuildFieldTable(WorkItem oldWi, StringBuilder history, bool useHTML = false)

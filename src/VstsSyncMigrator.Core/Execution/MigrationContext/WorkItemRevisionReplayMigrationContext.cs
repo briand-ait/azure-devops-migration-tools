@@ -203,10 +203,6 @@ namespace VstsSyncMigrator.Engine
                         newwit.Fields[me.ReflectedWorkItemIdFieldName].Value =
                             sourceStore.CreateReflectedWorkItemId(sourceWorkItem);
                     }
-                    var history = new StringBuilder();
-                    history.Append(
-                        "Migrated by <a href='https://dev.azure.com/nkdagility/migration-tools/'>Azure DevOps Migration Tools</a> open source.'>Azure DevOps Migration Tools</a>.");
-                    newwit.History = history.ToString();
 
                     newwit.Save();
                     newwit.Close();

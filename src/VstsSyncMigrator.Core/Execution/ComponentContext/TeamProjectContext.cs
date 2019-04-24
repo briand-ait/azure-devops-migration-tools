@@ -47,9 +47,9 @@ namespace VstsSyncMigrator.Engine
                           { "Target Project", this._TeamProjectName},
                           { "Target Collection", this._CollectionUrl.ToString() }
                     });
-                Stopwatch connectionTimer = new Stopwatch();
+                var connectionTimer = new Stopwatch();
                 connectionTimer.Start();
-                DateTime start = DateTime.Now;
+                var start = DateTime.Now;
                 Trace.WriteLine("Creating TfsTeamProjectCollection Object ");
                     _Collection = new TfsTeamProjectCollection(_CollectionUrl);
                 try

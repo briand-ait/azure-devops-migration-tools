@@ -26,16 +26,16 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            TestManagementContext SourceTmc = new TestManagementContext(me.Source);
-            TestManagementContext targetTmc = new TestManagementContext(me.Target);
+            var SourceTmc = new TestManagementContext(me.Source);
+            var targetTmc = new TestManagementContext(me.Target);
 
-            ITestConfigurationCollection tc = SourceTmc.Project.TestConfigurations.Query("Select * From TestConfiguration");
+            var tc = SourceTmc.Project.TestConfigurations.Query("Select * From TestConfiguration");
             Trace.WriteLine($"Plan to copy {tc.Count} Configurations", Name);
 
             foreach (var sourceTestConf in tc)
             {
                 Trace.WriteLine($"{sourceTestConf.Name} - Copy Configuration", Name);
-                ITestConfiguration targetTc = GetCon(targetTmc.Project.TestConfigurations, sourceTestConf.Name);
+                var targetTc = GetCon(targetTmc.Project.TestConfigurations, sourceTestConf.Name);
                 if (targetTc != null)
                 {
                     Trace.WriteLine($"{sourceTestConf.Name} - Found", Name);  

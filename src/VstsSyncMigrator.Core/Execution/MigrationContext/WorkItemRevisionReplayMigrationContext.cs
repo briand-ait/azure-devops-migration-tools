@@ -15,7 +15,7 @@ namespace VstsSyncMigrator.Engine
     public class WorkItemRevisionReplayMigrationContext : MigrationContextBase
     {
         private readonly WorkItemRevisionReplayMigrationConfig _config;
-        List<String> _ignore;
+        List<string> _ignore;
 
         public WorkItemRevisionReplayMigrationContext(MigrationEngine me, WorkItemRevisionReplayMigrationConfig config)
             : base(me, config)
@@ -204,8 +204,6 @@ namespace VstsSyncMigrator.Engine
                             sourceStore.CreateReflectedWorkItemId(sourceWorkItem);
                     }
                     var history = new StringBuilder();
-                    history.Append(
-                        "Migrated by <a href='https://dev.azure.com/nkdagility/migration-tools/'>Azure DevOps Migration Tools</a> open source.'>Azure DevOps Migration Tools</a>.");
                     newwit.History = history.ToString();
 
                     newwit.Save();
@@ -292,7 +290,7 @@ namespace VstsSyncMigrator.Engine
             }
 
             // Replace project name with new name (if necessary) and inject nodePath (Area or Iteration) into path for node validation
-            string newNodeName = "";
+            var newNodeName = "";
             if (_config.PrefixProjectToNodes)
             {
                 newNodeName = $@"{newProjectName}\{nodePath}\{oldNodeName}";

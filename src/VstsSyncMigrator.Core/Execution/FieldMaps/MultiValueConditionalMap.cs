@@ -38,7 +38,7 @@ namespace VstsSyncMigrator.Engine.ComponentContext
 
         private void fieldsUpdate(Dictionary<string, string> fieldAndValues, WorkItem workitem)
         {
-            foreach (string field in fieldAndValues.Keys)
+            foreach (var field in fieldAndValues.Keys)
             {
                 workitem.Fields[field].Value = fieldAndValues[field];
             }
@@ -46,8 +46,8 @@ namespace VstsSyncMigrator.Engine.ComponentContext
 
         private bool fieldsValueMatch(Dictionary<string, string> fieldAndValues, WorkItem workitem)
         {
-            bool matches = true;
-            foreach (string field in fieldAndValues.Keys)
+            var matches = true;
+            foreach (var field in fieldAndValues.Keys)
             {
                 if((string)workitem.Fields[field].Value != fieldAndValues[field])
                 {
@@ -59,8 +59,8 @@ namespace VstsSyncMigrator.Engine.ComponentContext
 
         private bool fieldsExist(Dictionary<string, string> fieldsAndValues, WorkItem workitem)
         {
-            bool exists = true;
-            foreach (string field in fieldsAndValues.Keys)
+            var exists = true;
+            foreach (var field in fieldsAndValues.Keys)
             {
                 if (!workitem.Fields.Contains(field))
                 {

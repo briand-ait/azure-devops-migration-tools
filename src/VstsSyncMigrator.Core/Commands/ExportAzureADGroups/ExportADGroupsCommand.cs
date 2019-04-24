@@ -21,41 +21,41 @@ namespace VstsSyncMigrator.Commands
         public static object Run(ExportADGroupsOptions opts, string logPath)
         {
             Telemetry.Current.TrackEvent("Run-ExportADGroupsCommand");
-            string exportPath = CreateExportPath(logPath, "ExportADGroups");
+            var exportPath = CreateExportPath(logPath, "ExportADGroups");
             Trace.Listeners.Add(new TextWriterTraceListener(Path.Combine(exportPath, "ExportADGroups.log"), "ExportADGroupsCommand"));
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
 
-            StreamWriter sw = File.CreateText(Path.Combine(exportPath, "AzureADGroups.csv"));
+            var sw = File.CreateText(Path.Combine(exportPath, "AzureADGroups.csv"));
             sw.AutoFlush = true;
             using (var csv = new CsvWriter(sw))
             {
                 csv.WriteHeader<AzureAdGroupItem>();
 
-                TfsTeamProjectCollection sourceCollection = new TfsTeamProjectCollection(opts.CollectionURL);
+                var sourceCollection = new TfsTeamProjectCollection(opts.CollectionURL);
                 sourceCollection.EnsureAuthenticated();
-                IIdentityManagementService2 sourceIMS2 = (IIdentityManagementService2)sourceCollection.GetService(typeof(IIdentityManagementService2));
-                List<CatalogNode> sourceTeamProjects = sourceCollection.CatalogNode.QueryChildren(new[] { CatalogResourceTypes.TeamProject }, false, CatalogQueryOptions.None).ToList();
+                var sourceIMS2 = (IIdentityManagementService2)sourceCollection.GetService(typeof(IIdentityManagementService2));
+                var sourceTeamProjects = sourceCollection.CatalogNode.QueryChildren(new[] { CatalogResourceTypes.TeamProject }, false, CatalogQueryOptions.None).ToList();
                 if (opts.TeamProject != null)
                 {
                     sourceTeamProjects = sourceTeamProjects.Where(x => x.Resource.DisplayName == opts.TeamProject).ToList();
                 }
-                int current = sourceTeamProjects.Count();
-                foreach (CatalogNode sourceTeamProject in sourceTeamProjects)
+                var current = sourceTeamProjects.Count();
+                foreach (var sourceTeamProject in sourceTeamProjects)
                 {
                     Trace.WriteLine(string.Format("---------------{0}\\{1}", current, sourceTeamProjects.Count()));
                     Trace.WriteLine(string.Format("{0}, {1}", sourceTeamProject.Resource.DisplayName, sourceTeamProject.Resource.Identifier));
-                    string projectUri = sourceTeamProject.Resource.Properties["ProjectUri"];
-                    TeamFoundationIdentity[] appGroups = sourceIMS2.ListApplicationGroups(projectUri, ReadIdentityOptions.None);
-                    foreach (TeamFoundationIdentity appGroup in appGroups.Where(x => !x.DisplayName.EndsWith("\\Project Valid Users")))
+                    var projectUri = sourceTeamProject.Resource.Properties["ProjectUri"];
+                    var appGroups = sourceIMS2.ListApplicationGroups(projectUri, ReadIdentityOptions.None);
+                    foreach (var appGroup in appGroups.Where(x => !x.DisplayName.EndsWith("\\Project Valid Users")))
                     {
                         Trace.WriteLine(string.Format("    {0}", appGroup.DisplayName));
-                        TeamFoundationIdentity sourceAppGroup = sourceIMS2.ReadIdentity(appGroup.Descriptor, MembershipQuery.Expanded, ReadIdentityOptions.None);
-                        foreach (IdentityDescriptor child in sourceAppGroup.Members.Where(x => x.IdentityType == "Microsoft.TeamFoundation.Identity"))
+                        var sourceAppGroup = sourceIMS2.ReadIdentity(appGroup.Descriptor, MembershipQuery.Expanded, ReadIdentityOptions.None);
+                        foreach (var child in sourceAppGroup.Members.Where(x => x.IdentityType == "Microsoft.TeamFoundation.Identity"))
                         {
 
-                            TeamFoundationIdentity sourceChildIdentity = sourceIMS2.ReadIdentity(IdentitySearchFactor.Identifier, child.Identifier, MembershipQuery.None, ReadIdentityOptions.ExtendedProperties);
+                            var sourceChildIdentity = sourceIMS2.ReadIdentity(IdentitySearchFactor.Identifier, child.Identifier, MembershipQuery.None, ReadIdentityOptions.ExtendedProperties);
 
                             if ((string)sourceChildIdentity.GetProperty("SpecialType") == "AzureActiveDirectoryApplicationGroup")
                             {

@@ -10,7 +10,7 @@ namespace _VstsSyncMigrator.Engine.Tests
         [TestMethod]
         public void EngineConfigurationCreate()
         {
-            EngineConfiguration ec = new EngineConfiguration();
+            var ec = new EngineConfiguration();
             ec.TelemetryEnableTrace = true;
             ec.Source = new TeamProjectConfig() { Name = "DemoProjs", Collection = new Uri("https://sdd2016.visualstudio.com/") };
             ec.Target = new TeamProjectConfig() { Name = "DemoProjt", Collection = new Uri("https://sdd2016.visualstudio.com/") };
@@ -23,7 +23,7 @@ namespace _VstsSyncMigrator.Engine.Tests
         [TestMethod]
         public void EngineConfigurationCreateDefault()
         {
-            EngineConfiguration ec = EngineConfiguration.GetDefault();
+            var ec = EngineConfiguration.GetDefault();
             Assert.IsNotNull(ec);
             Assert.IsNotNull(ec.Source);
             Assert.AreEqual(ec.Source.Name, "DemoProjs");

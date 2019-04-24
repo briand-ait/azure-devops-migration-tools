@@ -27,26 +27,26 @@ namespace VstsSyncMigrator.Engine
 
         public void AddTagToWit(WorkItem w, string tag)
         {
-            List<string> tags = w.Tags.Split(char.Parse(@";")).ToList();
-            List<string> newTags = tags.Union(new List<string>() { tag }).ToList();
+            var tags = w.Tags.Split(char.Parse(@";")).ToList();
+            var newTags = tags.Union(new List<string>() { tag }).ToList();
             w.Tags = string.Join(";", newTags.ToArray());
             w.Save();
         }
 
         internal override void InternalExecute()
         {
-            WorkItemStoreContext sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.BypassRules);
-            TfsQueryContext tfsqc = new TfsQueryContext(sourceStore);
+            var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.BypassRules);
+            var tfsqc = new TfsQueryContext(sourceStore);
             tfsqc.AddParameter("TeamProject", me.Source.Name);
             tfsqc.Query = string.Format(@"SELECT [System.Id] FROM WorkItems WHERE  [System.TeamProject] = @TeamProject {0} ORDER BY [System.ChangedDate] desc ", config.QueryBit); // AND  [Microsoft.VSTS.Common.ClosedDate] = ''
-            WorkItemCollection sourceWIS = tfsqc.Execute();
+            var sourceWIS = tfsqc.Execute();
             //////////////////////////////////////////////////
 
             Trace.WriteLine(string.Format("Migrate {0} work items links?", sourceWIS.Count), "LinkMigrationContext");
-            int current = sourceWIS.Count;
+            var current = sourceWIS.Count;
             //////////////////////////////////////////////////
-            WorkItemStoreContext targetWitsc = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            Project targetProj = targetWitsc.GetProject();
+            var targetWitsc = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var targetProj = targetWitsc.GetProject();
             //////////////////////////////////////////////////
             foreach (WorkItem wiSourceL in sourceWIS)
             {
@@ -87,15 +87,15 @@ namespace VstsSyncMigrator.Engine
                             {
                                 CreateHyperlink((Hyperlink)item, wiTargetL);
                             } else if (IsRelatedLink(item)) {
-                                RelatedLink rl = (RelatedLink)item;
+                                var rl = (RelatedLink)item;
                                 CreateRelatedLink(wiSourceL, rl, wiTargetL, sourceStore, targetWitsc);
                             }
                             else if (IsExternalLink(item))
                             {
-                                ExternalLink rl = (ExternalLink)item;
+                                var rl = (ExternalLink)item;
                                 CreateExternalLink((ExternalLink)item, wiTargetL);
                             } else {
-                                UnknownLinkTypeException ex = new UnknownLinkTypeException(string.Format("  [UnknownLinkType] Unable to {0}",item.GetType().Name));
+                                var ex = new UnknownLinkTypeException(string.Format("  [UnknownLinkType] Unable to {0}",item.GetType().Name));
                                 Telemetry.Current.TrackException(ex);
                                 Trace.WriteLine(ex.ToString(), "LinkMigrationContext");
                                 throw ex;
@@ -138,9 +138,9 @@ namespace VstsSyncMigrator.Engine
             var sourceSharedSteps =
                 sourceSharedStepLinks.Select(x => sourceStore.Store.GetWorkItem(x.RelatedWorkItemId));
 
-            foreach (WorkItem sourceSharedStep in sourceSharedSteps)
+            foreach (var sourceSharedStep in sourceSharedSteps)
             {
-                WorkItem matchingTargetSharedStep =
+                var matchingTargetSharedStep =
                     targetStore.FindReflectedWorkItemByReflectedWorkItemId(sourceSharedStep,
                         me.ReflectedWorkItemIdFieldName);
 
@@ -166,7 +166,7 @@ namespace VstsSyncMigrator.Engine
 
                 Trace.WriteLine(string.Format("Creating new {0} on {1}",
                                                    sourceLink.GetType().Name, target.Id), "LinkMigrationContext");
-                ExternalLink el = new ExternalLink(sourceLink.ArtifactLinkType, sourceLink.LinkedArtifactUri);
+                var el = new ExternalLink(sourceLink.ArtifactLinkType, sourceLink.LinkedArtifactUri);
                 el.Comment = sourceLink.Comment;
                 target.Links.Add(el);
                 target.Save();
@@ -183,7 +183,7 @@ namespace VstsSyncMigrator.Engine
 
         private void CreateRelatedLink(WorkItem wiSourceL, RelatedLink item, WorkItem wiTargetL, WorkItemStoreContext sourceStore, WorkItemStoreContext targetStore)
         {
-            RelatedLink rl = (RelatedLink)item;
+            var rl = (RelatedLink)item;
             WorkItem wiSourceR = null;
             WorkItem wiTargetR = null;
             try
@@ -209,7 +209,7 @@ namespace VstsSyncMigrator.Engine
             }
             if (wiTargetR != null)
             {
-                bool IsExisting = false;
+                var IsExisting = false;
                 try
                 {
                     var exist = (
@@ -235,8 +235,8 @@ namespace VstsSyncMigrator.Engine
                     {
                         Trace.WriteLine(
                             string.Format("  [CREATE-START] Adding Link of type {0} where wiSourceL={1}, wiSourceR={2}, wiTargetL={3}, wiTargetR={4} ", rl.LinkTypeEnd.ImmutableName, wiSourceL.Id, wiSourceR.Id, wiTargetL.Id, wiTargetR.Id));
-                        WorkItemLinkTypeEnd linkTypeEnd = targetStore.Store.WorkItemLinkTypes.LinkTypeEnds[rl.LinkTypeEnd.ImmutableName];
-                        RelatedLink newRl = new RelatedLink(linkTypeEnd, wiTargetR.Id);
+                        var linkTypeEnd = targetStore.Store.WorkItemLinkTypes.LinkTypeEnds[rl.LinkTypeEnd.ImmutableName];
+                        var newRl = new RelatedLink(linkTypeEnd, wiTargetR.Id);
 
                         wiTargetL.Links.Add(newRl);
                         wiTargetL.Save();
@@ -310,7 +310,7 @@ namespace VstsSyncMigrator.Engine
             var exist = (from Link l in target.Links where l is Hyperlink && ((Hyperlink)l).Location == ((Hyperlink)sourceLink).Location select (Hyperlink)l).SingleOrDefault();
             if (exist == null)
             {
-                Hyperlink hl = new Hyperlink(sourceLink.Location);
+                var hl = new Hyperlink(sourceLink.Location);
                 hl.Comment = sourceLink.Comment;
                 target.Links.Add(hl);
                 target.Save();

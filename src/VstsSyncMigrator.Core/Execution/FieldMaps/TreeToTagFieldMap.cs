@@ -28,7 +28,7 @@ namespace VstsSyncMigrator.Engine
         public void Execute(WorkItem source, WorkItem target)
         {
 
-            List<string> newTags = target.Tags.Split(char.Parse(@";")).ToList();
+            var newTags = target.Tags.Split(char.Parse(@";")).ToList();
 
             string value;
 
@@ -41,7 +41,7 @@ namespace VstsSyncMigrator.Engine
                 value = source.AreaPath;
             }
 
-            List<string> bits = new List<string>(value.Split(char.Parse(@"\"))).Skip(config.toSkip).ToList();
+            var bits = new List<string>(value.Split(char.Parse(@"\"))).Skip(config.toSkip).ToList();
             target.Tags = string.Join(";", newTags.Union(bits).ToArray());
         }
     }

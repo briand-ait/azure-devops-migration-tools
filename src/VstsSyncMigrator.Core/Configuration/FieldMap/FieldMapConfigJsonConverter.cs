@@ -13,8 +13,8 @@ namespace VstsSyncMigrator.Engine.Configuration.FieldMap
         {
             if (FieldExists("ObjectType", jObject))
             {
-                string typename = jObject.GetValue("ObjectType").ToString();
-                Type type = Type.GetType(typename, true);
+                var typename = jObject.GetValue("ObjectType").ToString();
+                var type = Type.GetType(typename, true);
                 return (IFieldMapConfig)Activator.CreateInstance(type);
             }
             else

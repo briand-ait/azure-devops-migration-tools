@@ -17,7 +17,7 @@ namespace VstsSyncMigrator.Engine
 
         WorkItemMigrationConfig _config;
         MigrationEngine _me;
-        List<String> _ignore;
+        List<string> _ignore;
 
         public override string Name
         {
@@ -66,46 +66,58 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            //////////////////////////////////////////////////
-            WorkItemStoreContext sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.BypassRules);
-            TfsQueryContext tfsqc = new TfsQueryContext(sourceStore);
+            var stopwatch = Stopwatch.StartNew();
+
+            var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.BypassRules);
+            
+            var tfsqc = new TfsQueryContext(sourceStore);
+            
             tfsqc.AddParameter("TeamProject", me.Source.Name);
+            
             tfsqc.Query = string.Format(@"SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @TeamProject {0} ORDER BY [System.ChangedDate] desc", _config.QueryBit);
-            WorkItemCollection sourceWIS = tfsqc.Execute();
+            
+            var sourceWIS = tfsqc.Execute();
+            
             Trace.WriteLine(string.Format("Migrate {0} work items?", sourceWIS.Count), this.Name);
-            //////////////////////////////////////////////////
-            WorkItemStoreContext targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            Project destProject = targetStore.GetProject();
+            
+            
+            var targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var destProject = targetStore.GetProject();
+            
             Trace.WriteLine(string.Format("Found target project as {0}", destProject.Name), this.Name);
 
-            int current = sourceWIS.Count;
-            int count = 0;
-            int failures = 0;
-            int imported = 0;
-            int skipped = 0;
-            long elapsedms = 0;
+            var current = sourceWIS.Count;
+            var count = 0;
+            var failures = 0;
+            var imported = 0;
+            var skipped = 0;
+            var elapsedms = 0L;
+            
             foreach (WorkItem sourceWI in sourceWIS)
             {
-                Stopwatch witstopwatch = new Stopwatch();
-                witstopwatch.Start();
-                WorkItem targetFound;
-                targetFound = targetStore.FindReflectedWorkItem(sourceWI, me.ReflectedWorkItemIdFieldName, false);
+                var witstopwatch = Stopwatch.StartNew();
+
+                var targetFound = targetStore.FindReflectedWorkItem(sourceWI, me.ReflectedWorkItemIdFieldName, false);
+                
                 Trace.WriteLine(string.Format("{0} - Migrating: {1}-{2}", current, sourceWI.Id, sourceWI.Type.Name), this.Name);
+                
                 if (targetFound == null)
                 {
                     WorkItem newwit = null;
-                    // Deside on WIT
+                
                     if (me.WorkItemTypeDefinitions.ContainsKey(sourceWI.Type.Name))
                     {
                         newwit = CreateAndPopulateWorkItem(_config, sourceWI, destProject, me.WorkItemTypeDefinitions[sourceWI.Type.Name].Map(sourceWI));
+                
                         if (newwit.Fields.Contains(me.ReflectedWorkItemIdFieldName))
                         {
                             newwit.Fields[me.ReflectedWorkItemIdFieldName].Value = sourceStore.CreateReflectedWorkItemId(sourceWI);
                         }
+                        
                         me.ApplyFieldMappings(sourceWI, newwit);
-                        ArrayList fails = newwit.Validate();
+                        
+                        var fails = newwit.Validate();
+                        
                         foreach (Field f in fails)
                         {
                             Trace.WriteLine(string.Format("{0} - Invalid: {1}-{2}-{3}-{4} Status: {5} Value: {6}", current, sourceWI.Id, sourceWI.Type.Name, f.ReferenceName, sourceWI.Title, f.Status, f.Value), this.Name);
@@ -180,8 +192,8 @@ namespace VstsSyncMigrator.Engine
                 elapsedms = elapsedms + witstopwatch.ElapsedMilliseconds;
                 current--;
                 count++;
-                TimeSpan average = new TimeSpan(0, 0, 0, 0, (int)(elapsedms / count));
-                TimeSpan remaining = new TimeSpan(0, 0, 0, 0, (int)(average.TotalMilliseconds * current));
+                var average = new TimeSpan(0, 0, 0, 0, (int)(elapsedms / count));
+                var remaining = new TimeSpan(0, 0, 0, 0, (int)(average.TotalMilliseconds * current));
                 Trace.WriteLine(string.Format("Average time of {0} per work item and {1} estimated to completion", string.Format(@"{0:s\:fff} seconds", average), string.Format(@"{0:%h} hours {0:%m} minutes {0:s\:fff} seconds", remaining)), this.Name);
                 Trace.Flush();
             }
@@ -196,22 +208,27 @@ namespace VstsSyncMigrator.Engine
             return sourceWI.Title.ToLower().StartsWith("epic") || sourceWI.Title.ToLower().StartsWith("theme");
         }
 
-        private WorkItem CreateAndPopulateWorkItem(WorkItemMigrationConfig config, WorkItem oldWi, Project destProject, String destType)
+        private WorkItem CreateAndPopulateWorkItem(WorkItemMigrationConfig config, WorkItem oldWi, Project destProject, string destType)
         {
-            Stopwatch fieldMappingTimer = new Stopwatch();
+            var fieldMappingTimer = new Stopwatch();
 
             Trace.Write("... Building", "WorkItemMigrationContext");
 
-            var NewWorkItemstartTime = DateTime.UtcNow;
-            Stopwatch NewWorkItemTimer = new Stopwatch();
-            WorkItem newwit = destProject.WorkItemTypes[destType].NewWorkItem();
-            NewWorkItemTimer.Stop();
-            Telemetry.Current.TrackDependency("TeamService", "NewWorkItem", NewWorkItemstartTime, NewWorkItemTimer.Elapsed, true);
-            Trace.WriteLine(string.Format("Dependancy: {0} - {1} - {2} - {3} - {4}", "TeamService", "NewWorkItem", NewWorkItemstartTime, NewWorkItemTimer.Elapsed, true), "WorkItemMigrationContext");
+            var newWorkItemstartTime = DateTime.UtcNow;
+            var newWorkItemTimer = new Stopwatch();
+            
+            var newwit = destProject.WorkItemTypes[destType].NewWorkItem();
+            
+            newWorkItemTimer.Stop();
+            
+            Telemetry.Current.TrackDependency("TeamService", "NewWorkItem", newWorkItemstartTime, newWorkItemTimer.Elapsed, true);
+            
+            Trace.WriteLine(string.Format("Dependancy: {0} - {1} - {2} - {3} - {4}", "TeamService", "NewWorkItem", newWorkItemstartTime, newWorkItemTimer.Elapsed, true), "WorkItemMigrationContext");
+            
             newwit.Title = oldWi.Title;
             newwit.State = oldWi.State;
             newwit.Reason = oldWi.Reason;
-
+            
             foreach (Field f in oldWi.Fields)
             {
                 if (newwit.Fields.Contains(f.ReferenceName) && !_ignore.Contains(f.ReferenceName) && newwit.Fields[f.ReferenceName].IsEditable)
@@ -255,11 +272,11 @@ namespace VstsSyncMigrator.Engine
                 newwit.Fields["Microsoft.VSTS.Common.BacklogPriority"].Value = 10;
             }
 
-            StringBuilder description = new StringBuilder();
+            var description = new StringBuilder();
             description.Append(oldWi.Description);
             newwit.Description = description.ToString();
 
-            StringBuilder history = new StringBuilder();
+            var history = new StringBuilder();
             BuildCommentTable(oldWi, history);
 
             if (_config.BuildFieldTable)
@@ -267,31 +284,21 @@ namespace VstsSyncMigrator.Engine
                 BuildFieldTable(oldWi, history);
             }
 
-            if (_config.AppendMigrationToolSignatureFooter)
-            {
-                AppendMigratedByFooter(history);
-            }
-
+            
             newwit.History = history.ToString();
 
             fieldMappingTimer.Stop();
             Telemetry.Current.TrackMetric("FieldMappingTime", fieldMappingTimer.ElapsedMilliseconds);
-            Trace.WriteLine(string.Format("FieldMapOnNewWorkItem: {0} - {1}", NewWorkItemstartTime, fieldMappingTimer.Elapsed.ToString("c")), "WorkItemMigrationContext");
+            Trace.WriteLine(string.Format("FieldMapOnNewWorkItem: {0} - {1}", newWorkItemstartTime, fieldMappingTimer.Elapsed.ToString("c")), "WorkItemMigrationContext");
             return newwit;
         }
 
         private static string ReplaceFirstOccurence(string wordToReplace, string replaceWith, string input)
         {
-            Regex r = new Regex(wordToReplace, RegexOptions.IgnoreCase);
+            var r = new Regex(wordToReplace, RegexOptions.IgnoreCase);
             return r.Replace(input, replaceWith, 1);
         }
-
-
-        private static void AppendMigratedByFooter(StringBuilder history)
-        {
-            history.Append("<p>Migrated by <a href='https://dev.azure.com/nkdagility/migration-tools/'>Azure DevOps Migration Tools</a> open source.</p>");
-        }
-
+        
         private static void BuildFieldTable(WorkItem oldWi, StringBuilder history, bool useHTML = false)
         {
             history.Append("<p>Fields from previous Work Item:</p>");
@@ -331,8 +338,8 @@ namespace VstsSyncMigrator.Engine
 
         static bool isNumeric(string val, NumberStyles NumberStyle)
         {
-            Double result;
-            return Double.TryParse(val, NumberStyle,
+            double result;
+            return double.TryParse(val, NumberStyle,
                 System.Globalization.CultureInfo.CurrentCulture, out result);
         }
 

@@ -41,11 +41,11 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
             string exportPath;
-            string assPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            var assPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             exportPath = Path.Combine(Path.GetDirectoryName(assPath), "export-pic");
             if (!Directory.Exists(exportPath))
             {
@@ -53,44 +53,44 @@ namespace VstsSyncMigrator.Engine
             }
 
 
-            TeamFoundationIdentity SIDS = ims2.ReadIdentity(IdentitySearchFactor.AccountName, "Team Foundation Valid Users", MembershipQuery.Expanded, ReadIdentityOptions.None);
+            var SIDS = ims2.ReadIdentity(IdentitySearchFactor.AccountName, "Team Foundation Valid Users", MembershipQuery.Expanded, ReadIdentityOptions.None);
 
             Trace.WriteLine(string.Format("Found {0}", SIDS.Members.Count()));
             var itypes = (from IdentityDescriptor id in SIDS.Members select id.IdentityType).Distinct();
 
-            foreach (string item in itypes)
+            foreach (var item in itypes)
             {
                 var infolks = (from IdentityDescriptor id in SIDS.Members where id.IdentityType == item select id);
                 Trace.WriteLine(string.Format("Found {0} of {1}", infolks.Count(), item));
             }
             var folks = (from IdentityDescriptor id in SIDS.Members where id.IdentityType == "System.Security.Principal.WindowsIdentity" select id);
 
-            DirectoryContext objContext = new DirectoryContext(DirectoryContextType.Domain, config.Domain, config.Username, config.Password);
-            Domain objDomain = Domain.GetDomain(objContext);
-            string ldapName = string.Format("LDAP://{0}", objDomain.Name);
+            var objContext = new DirectoryContext(DirectoryContextType.Domain, config.Domain, config.Username, config.Password);
+            var objDomain = Domain.GetDomain(objContext);
+            var ldapName = string.Format("LDAP://{0}", objDomain.Name);
 
-            int current = folks.Count();
-            foreach (IdentityDescriptor id in folks)
+            var current = folks.Count();
+            foreach (var id in folks)
             {
                 try
                 {
-                    TeamFoundationIdentity i = ims2.ReadIdentity(IdentitySearchFactor.Identifier, id.Identifier, MembershipQuery.Direct, ReadIdentityOptions.None);
+                    var i = ims2.ReadIdentity(IdentitySearchFactor.Identifier, id.Identifier, MembershipQuery.Direct, ReadIdentityOptions.None);
                     if (!(i == null) && i.IsContainer == false)
                     {
-                        DirectoryEntry d = new DirectoryEntry(ldapName, config.Username, config.Password);
-                        DirectorySearcher dssearch = new DirectorySearcher(d);
+                        var d = new DirectoryEntry(ldapName, config.Username, config.Password);
+                        var dssearch = new DirectorySearcher(d);
                         dssearch.Filter = string.Format("(sAMAccountName={0})", i.UniqueName.Split(char.Parse(@"\"))[1]);
-                        SearchResult sresult = dssearch.FindOne();
-                        WebClient webClient = new WebClient();
+                        var sresult = dssearch.FindOne();
+                        var webClient = new WebClient();
                         webClient.Credentials = CredentialCache.DefaultNetworkCredentials;
                         if (sresult != null)
                         {
-                            string newImage = Path.Combine(exportPath, string.Format("{0}.jpg", i.UniqueName.Replace(@"\", "-")));
+                            var newImage = Path.Combine(exportPath, string.Format("{0}.jpg", i.UniqueName.Replace(@"\", "-")));
                             if (!File.Exists(newImage))
                             {
-                                DirectoryEntry deUser = new DirectoryEntry(sresult.Path, config.Username, config.Password);
+                                var deUser = new DirectoryEntry(sresult.Path, config.Username, config.Password);
                                 Trace.WriteLine(string.Format("{0} [PROCESS] {1}: {2}", current, deUser.Name, newImage));
-                                string empPic = string.Format(config.PictureEmpIDFormat, deUser.Properties["employeeNumber"].Value);
+                                var empPic = string.Format(config.PictureEmpIDFormat, deUser.Properties["employeeNumber"].Value);
                                 try
                                 {
 

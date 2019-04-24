@@ -55,9 +55,9 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            ITestPlanCollection sourcePlans = sourceTestStore.GetTestPlans();
+            var sourcePlans = sourceTestStore.GetTestPlans();
             Trace.WriteLine(string.Format("Plan to copy {0} Plans?", sourcePlans.Count), "TestPlansAndSuites");
-            foreach (ITestPlan sourcePlan in sourcePlans)
+            foreach (var sourcePlan in sourcePlans)
             {
                 if (CanSkipElementBecauseOfTags(sourcePlan.Id))
                     continue;
@@ -104,7 +104,7 @@ namespace VstsSyncMigrator.Engine
 
                 targetPlan.Save();
                 // Load the plan again, because somehow it doesn't let me set configurations on the already loaded plan
-                ITestPlan targetPlan2 = FindTestPlan(targetTestStore, targetPlan.Name);
+                var targetPlan2 = FindTestPlan(targetTestStore, targetPlan.Name);
                 ApplyConfigurationsAndAssignTesters(sourcePlan.RootSuite, targetPlan2.RootSuite);
             }
         }
@@ -219,7 +219,7 @@ namespace VstsSyncMigrator.Engine
                         targetSuiteChild = CreateNewStaticTestSuite(sourceSuite);
                         break;
                     case TestSuiteType.RequirementTestSuite:
-                        int sourceRid = ((IRequirementTestSuite)sourceSuite).RequirementId;
+                        var sourceRid = ((IRequirementTestSuite)sourceSuite).RequirementId;
                         WorkItem sourceReq = null;
                         WorkItem targetReq = null;
                         try
@@ -311,10 +311,10 @@ namespace VstsSyncMigrator.Engine
                     CultureInfo.InvariantCulture.CompareInfo.IndexOf(dynamic.Query.QueryText, "[System.Id]",
                         CompareOptions.IgnoreCase) >= 0)
                 {
-                    string regExSearchForSystemId = @"(\[System.Id\]\s*=\s*[\d]*)";
-                    string regExSearchForSystemId2 = @"(\[System.Id\]\s*IN\s*)";
+                    var regExSearchForSystemId = @"(\[System.Id\]\s*=\s*[\d]*)";
+                    var regExSearchForSystemId2 = @"(\[System.Id\]\s*IN\s*)";
 
-                    MatchCollection matches = Regex.Matches(dynamic.Query.QueryText, regExSearchForSystemId, RegexOptions.IgnoreCase);
+                    var matches = Regex.Matches(dynamic.Query.QueryText, regExSearchForSystemId, RegexOptions.IgnoreCase);
 
                     foreach (Match match in matches)
                     {
@@ -357,8 +357,8 @@ namespace VstsSyncMigrator.Engine
                 return;
 
             Trace.WriteLine(string.Format("            Suite has {0} test cases", source.TestCases.Count), "TestPlansAndSuites");
-            List<ITestCase> tcs = new List<ITestCase>();
-            foreach (ITestSuiteEntry sourceTestCaseEntry in source.TestCases)
+            var tcs = new List<ITestCase>();
+            foreach (var sourceTestCaseEntry in source.TestCases)
             {
                 Trace.WriteLine($"Work item: {sourceTestCaseEntry.Id}");
 
@@ -366,7 +366,7 @@ namespace VstsSyncMigrator.Engine
                     return;
 
                 Trace.WriteLine(string.Format("    Processing {0} : {1} - {2} ", sourceTestCaseEntry.EntryType.ToString(), sourceTestCaseEntry.Id, sourceTestCaseEntry.Title), "TestPlansAndSuites");
-                WorkItem wi = targetWitStore.FindReflectedWorkItem(sourceTestCaseEntry.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
+                var wi = targetWitStore.FindReflectedWorkItem(sourceTestCaseEntry.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
                 if (wi == null)
                 {
                     Trace.WriteLine(string.Format("    Can't find work item for Test Case. Has it been migrated? {0} : {1} - {2} ", sourceTestCaseEntry.EntryType.ToString(), sourceTestCaseEntry.Id, sourceTestCaseEntry.Title), "TestPlansAndSuites");
@@ -382,7 +382,7 @@ namespace VstsSyncMigrator.Engine
                 }
                 else
                 {
-                    ITestCase targetTestCase = targetTestStore.Project.TestCases.Find(wi.Id);
+                    var targetTestCase = targetTestStore.Project.TestCases.Find(wi.Id);
                     if (targetTestCase == null)
                     {
                         Trace.WriteLine(string.Format("    ERROR: Test case not found {0} : {1} - {2} ", sourceTestCaseEntry.EntryType, sourceTestCaseEntry.Id, sourceTestCaseEntry.Title), "TestPlansAndSuites");
@@ -440,9 +440,9 @@ namespace VstsSyncMigrator.Engine
         private void ApplyConfigurationsAndAssignTesters(ITestSuiteBase sourceSuite, ITestSuiteBase targetSuite)
         {
             Trace.Write($"Applying configurations for test cases in source suite {sourceSuite.Title}");
-            foreach (ITestSuiteEntry sourceTce in sourceSuite.TestCases)
+            foreach (var sourceTce in sourceSuite.TestCases)
             {
-                WorkItem wi = targetWitStore.FindReflectedWorkItem(sourceTce.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
+                var wi = targetWitStore.FindReflectedWorkItem(sourceTce.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
                 ITestSuiteEntry targetTce;
                 if (wi != null)
                 {
@@ -471,17 +471,17 @@ namespace VstsSyncMigrator.Engine
             //Loop over child suites and set configurations for test case entries there
             if (HasChildSuites(sourceSuite))
             {
-                foreach(ITestSuiteEntry sourceSuiteChild in ((IStaticTestSuite)sourceSuite).Entries.Where(
+                foreach(var sourceSuiteChild in ((IStaticTestSuite)sourceSuite).Entries.Where(
                     e => e.EntryType == TestSuiteEntryType.DynamicTestSuite
                     || e.EntryType == TestSuiteEntryType.RequirementTestSuite
                     || e.EntryType == TestSuiteEntryType.StaticTestSuite))
                 {
                     //Find migrated suite in target
-                    WorkItem sourceSuiteWi = sourceWitStore.Store.GetWorkItem(sourceSuiteChild.Id);
-                    WorkItem targetSuiteWi = targetWitStore.FindReflectedWorkItem(sourceSuiteWi, me.ReflectedWorkItemIdFieldName, false);
+                    var sourceSuiteWi = sourceWitStore.Store.GetWorkItem(sourceSuiteChild.Id);
+                    var targetSuiteWi = targetWitStore.FindReflectedWorkItem(sourceSuiteWi, me.ReflectedWorkItemIdFieldName, false);
                     if (targetSuiteWi != null)
                     {
-                        ITestSuiteEntry targetSuiteChild = (from tc in ((IStaticTestSuite)targetSuite).Entries
+                        var targetSuiteChild = (from tc in ((IStaticTestSuite)targetSuite).Entries
                                                             where tc.Id == targetSuiteWi.Id
                                                             select tc).FirstOrDefault();
                         if (targetSuiteChild != null)
@@ -507,12 +507,12 @@ namespace VstsSyncMigrator.Engine
                 Trace.TraceError($"Target Suite is NULL");
             }
             
-            List<ITestPointAssignment> assignmentsToAdd = new List<ITestPointAssignment>();
+            var assignmentsToAdd = new List<ITestPointAssignment>();
             //loop over all source test case entries
-            foreach (ITestSuiteEntry sourceTce in sourceSuite.TestCases)
+            foreach (var sourceTce in sourceSuite.TestCases)
             {
                 // find target testcase id for this source tce
-                WorkItem targetTc = targetWitStore.FindReflectedWorkItem(sourceTce.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
+                var targetTc = targetWitStore.FindReflectedWorkItem(sourceTce.TestCase.WorkItem, me.ReflectedWorkItemIdFieldName, false);
 
                 if (targetTc == null)
                 {
@@ -520,9 +520,9 @@ namespace VstsSyncMigrator.Engine
                 }
 
                 //figure out test point assignments for each source tce
-                foreach (ITestPointAssignment tpa in sourceTce.PointAssignments)
+                foreach (var tpa in sourceTce.PointAssignments)
                 {
-                    int sourceConfigurationId = tpa.ConfigurationId;
+                    var sourceConfigurationId = tpa.ConfigurationId;
 
                     TeamFoundationIdentity targetIdentity = null;
 
@@ -539,18 +539,18 @@ namespace VstsSyncMigrator.Engine
 
                     // translate source configuration id to target configuration id and name
                     //// Get source configuration name
-                    string sourceConfigName = (from tc in sourceTestConfigs
+                    var sourceConfigName = (from tc in sourceTestConfigs
                         where tc.Id == sourceConfigurationId
                         select tc.Name).FirstOrDefault();
 
                     //// Find source configuration name in target and get the id for it
-                    int targetConfigId = (from tc in targetTestConfigs
+                    var targetConfigId = (from tc in targetTestConfigs
                         where tc.Name == sourceConfigName
                         select tc.Id).FirstOrDefault();
 
                     if (targetConfigId != 0)
                     {
-                        IdAndName targetConfiguration = new IdAndName(targetConfigId, sourceConfigName);
+                        var targetConfiguration = new IdAndName(targetConfigId, sourceConfigName);
 
                         var targetUserId = Guid.Empty;
                         if (targetIdentity != null)
@@ -589,7 +589,7 @@ namespace VstsSyncMigrator.Engine
                 sourceIdentityDescriptor,
                 MembershipQuery.Direct,
                 ReadIdentityOptions.ExtendedProperties);
-            string sourceIdentityMail = sourceIdentity.GetProperty("Mail") as string;
+            var sourceIdentityMail = sourceIdentity.GetProperty("Mail") as string;
 
             // Try refresh the Identity if we are missing the Mail property
             if (string.IsNullOrEmpty(sourceIdentityMail))
@@ -643,8 +643,8 @@ namespace VstsSyncMigrator.Engine
         /// <param name="targetEntry"></param>
         private void ApplyConfigurations(ITestSuiteEntry sourceEntry, ITestSuiteEntry targetEntry)
         {
-            int sourceConfigCount = sourceEntry.Configurations != null ? sourceEntry.Configurations.Count : 0;
-            int targetConfigCount = targetEntry.Configurations != null ? targetEntry.Configurations.Count : 0;
+            var sourceConfigCount = sourceEntry.Configurations != null ? sourceEntry.Configurations.Count : 0;
+            var targetConfigCount = targetEntry.Configurations != null ? targetEntry.Configurations.Count : 0;
             var deviations = sourceConfigCount > 0 && targetConfigCount > 0 && sourceEntry.Configurations.Select(x => x.Name).Intersect(targetEntry.Configurations.Select(x => x.Name)).Count() < sourceConfigCount;
 
             if ((sourceConfigCount != targetConfigCount) || deviations)
@@ -682,7 +682,7 @@ namespace VstsSyncMigrator.Engine
 
         private ITestSuiteBase CreateNewDynamicTestSuite(ITestSuiteBase source)
         {
-            IDynamicTestSuite targetSuiteChild = targetTestStore.Project.TestSuites.CreateDynamic();
+            var targetSuiteChild = targetTestStore.Project.TestSuites.CreateDynamic();
             targetSuiteChild.TestSuiteEntry.Title = source.TestSuiteEntry.Title;
             ApplyTestSuiteQuery(source, targetSuiteChild, targetTestStore);
 
@@ -751,7 +751,7 @@ namespace VstsSyncMigrator.Engine
 
         private bool HasChildSuites(ITestSuiteBase sourceSuite)
         {
-            bool hasChildren = false;
+            var hasChildren = false;
             if (sourceSuite != null && sourceSuite.TestSuiteType == TestSuiteType.StaticTestSuite)
             {
                 hasChildren = (((IStaticTestSuite)sourceSuite).Entries.Count > 0);
@@ -856,7 +856,7 @@ namespace VstsSyncMigrator.Engine
         {
             if (exception.Message.Contains("The specified iteration path does not exist."))
             {
-                Regex regEx = new Regex(@"'(.*?)'");
+                var regEx = new Regex(@"'(.*?)'");
 
                 var missingIterationPath = regEx.Match(exception.Message).Groups[0].Value;
                 missingIterationPath = missingIterationPath.Substring(missingIterationPath.IndexOf(@"\") + 1, missingIterationPath.Length - missingIterationPath.IndexOf(@"\") - 2);

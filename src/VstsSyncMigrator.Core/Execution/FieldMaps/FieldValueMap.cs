@@ -25,7 +25,7 @@ namespace VstsSyncMigrator.Engine.ComponentContext
         {
             if (source.Fields.Contains(config.sourceField))
             {
-                string sourceValue = source.Fields[config.sourceField].Value != null 
+                var sourceValue = source.Fields[config.sourceField].Value != null 
                     ? source.Fields[config.sourceField].Value.ToString()
                     : null;
 

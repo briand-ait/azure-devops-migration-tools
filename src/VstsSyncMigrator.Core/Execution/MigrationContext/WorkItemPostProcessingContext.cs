@@ -50,32 +50,32 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
-            WorkItemStoreContext sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
-            TfsQueryContext tfsqc = new TfsQueryContext(sourceStore);
+            var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
+            var tfsqc = new TfsQueryContext(sourceStore);
             tfsqc.AddParameter("TeamProject", me.Source.Name);
 
             //Builds the constraint part of the query
-            string constraints = BuildQueryBitConstraints();
+            var constraints = BuildQueryBitConstraints();
             
             tfsqc.Query = string.Format(@"SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @TeamProject {0} ORDER BY [System.Id] ", constraints); 
             
-            WorkItemCollection sourceWIS = tfsqc.Execute();
+            var sourceWIS = tfsqc.Execute();
             Trace.WriteLine(string.Format("Migrate {0} work items?", sourceWIS.Count));
             //////////////////////////////////////////////////
-            WorkItemStoreContext targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            Project destProject = targetStore.GetProject();
+            var targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var destProject = targetStore.GetProject();
             Trace.WriteLine(string.Format("Found target project as {0}", destProject.Name));
            
            
-            int current = sourceWIS.Count;
-            int count = 0;
+            var current = sourceWIS.Count;
+            var count = 0;
             long elapsedms = 0;
             foreach (WorkItem sourceWI in sourceWIS)
             {
-                Stopwatch witstopwatch = new Stopwatch();
+                var witstopwatch = new Stopwatch();
                 witstopwatch.Start();
                 WorkItem targetFound;
                 targetFound = targetStore.FindReflectedWorkItem(sourceWI, me.ReflectedWorkItemIdFieldName, false);
@@ -113,8 +113,8 @@ namespace VstsSyncMigrator.Engine
                 elapsedms = elapsedms + witstopwatch.ElapsedMilliseconds;
                 current--;
                 count++;
-                TimeSpan average = new TimeSpan(0, 0, 0, 0, (int)(elapsedms / count));
-                TimeSpan remaining = new TimeSpan(0, 0, 0, 0, (int)(average.TotalMilliseconds * current));
+                var average = new TimeSpan(0, 0, 0, 0, (int)(elapsedms / count));
+                var remaining = new TimeSpan(0, 0, 0, 0, (int)(average.TotalMilliseconds * current));
                 Trace.WriteLine(string.Format("Average time of {0} per work item and {1} estimated to completion", string.Format(@"{0:s\:fff} seconds", average), string.Format(@"{0:%h} hours {0:%m} minutes {0:s\:fff} seconds", remaining)));
             }
             //////////////////////////////////////////////////
@@ -124,7 +124,7 @@ namespace VstsSyncMigrator.Engine
 
         private string BuildQueryBitConstraints()
         {
-            string constraints = "";
+            var constraints = "";
 
             if (_config.WorkItemIDs != null && _config.WorkItemIDs.Count > 0)
             {
@@ -151,7 +151,7 @@ namespace VstsSyncMigrator.Engine
             }
 
             
-            if (!String.IsNullOrEmpty (_config.QueryBit))
+            if (!string.IsNullOrEmpty (_config.QueryBit))
             {
                 constraints += _config.QueryBit;
             }

@@ -48,19 +48,19 @@ namespace VstsSyncMigrator.Engine
             this.SetSourceReflectedWorkItemIdFieldName(config.SourceReflectedWorkItemIDFieldName);
             if (config.FieldMaps != null)
             {
-                foreach (IFieldMapConfig fieldmapConfig in config.FieldMaps)
+                foreach (var fieldmapConfig in config.FieldMaps)
                 {
                     Trace.WriteLine(string.Format("Adding FieldMap {0}", fieldmapConfig.FieldMap.Name), "MigrationEngine");
                     this.AddFieldMap(fieldmapConfig.WorkItemTypeName, (IFieldMap)Activator.CreateInstance(fieldmapConfig.FieldMap, fieldmapConfig));
                 }
             }            
-            foreach (string key in config.WorkItemTypeDefinition.Keys)
+            foreach (var key in config.WorkItemTypeDefinition.Keys)
             {
                 Trace.WriteLine(string.Format("Adding Work Item Type {0}", key), "MigrationEngine");
                 this.AddWorkItemTypeDefinition(key, new DescreteWitdMapper(config.WorkItemTypeDefinition[key]));
             }
             var enabledProcessors = config.Processors.Where(x => x.Enabled).ToList();
-            foreach (ITfsProcessingConfig processorConfig in enabledProcessors)
+            foreach (var processorConfig in enabledProcessors)
             {
                 if (processorConfig.IsProcessorCompatible(enabledProcessors))
                 {
@@ -124,13 +124,13 @@ namespace VstsSyncMigrator.Engine
                     { "Actions",  processorActions.Count},
                     { "Mappings", fieldMapps.Count }
                 });
-            Stopwatch engineTimer = new Stopwatch();
+            var engineTimer = new Stopwatch();
             engineTimer.Start();
-            ProcessingStatus ps = ProcessingStatus.Complete;
+            var ps = ProcessingStatus.Complete;
             Trace.WriteLine(string.Format("Beginning run of {0} processors", processors.Count.ToString()), "MigrationEngine");
-            foreach (ITfsProcessingContext process in processors)
+            foreach (var process in processors)
             {
-                Stopwatch processorTimer = new Stopwatch();
+                var processorTimer = new Stopwatch();
                 processorTimer.Start();
                 process.Execute();
                 processorTimer.Stop();
@@ -155,7 +155,7 @@ namespace VstsSyncMigrator.Engine
 
         public void AddProcessor<TProcessor>()
         {
-            ITfsProcessingContext pc = (ITfsProcessingContext)Activator.CreateInstance(typeof(TProcessor), new object[] { this });
+            var pc = (ITfsProcessingContext)Activator.CreateInstance(typeof(TProcessor), new object[] { this });
             AddProcessor(pc);
         }
 
@@ -228,7 +228,7 @@ namespace VstsSyncMigrator.Engine
 
         private  void ProcessFieldMapList(WorkItem source, WorkItem target, List<IFieldMap> list)
         {
-            foreach (IFieldMap map in list)
+            foreach (var map in list)
             {
                 Trace.WriteLine(string.Format("Running Field Map: {0} {1}", map.Name, map.MappingDisplayName));
                 map.Execute(source, target);

@@ -29,19 +29,19 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
           
 
 
-            WorkItemStoreContext sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
-            TfsQueryContext tfsqc = new TfsQueryContext(sourceStore);
+            var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
+            var tfsqc = new TfsQueryContext(sourceStore);
             tfsqc.AddParameter("TeamProject", me.Source.Name);
             tfsqc.Query = string.Format(@"SELECT [System.Id], [System.Tags] FROM WorkItems WHERE [System.TeamProject] = @TeamProject {0} ORDER BY [System.ChangedDate] desc", _config.QueryBit);
-            WorkItemCollection sourceWIS = tfsqc.Execute();
+            var sourceWIS = tfsqc.Execute();
 
-            int current = sourceWIS.Count;
+            var current = sourceWIS.Count;
             var workItemServer = me.Source.Collection.GetService<WorkItemServer>();
 
             var invalidFileNameChars = Path.GetInvalidFileNameChars();
@@ -51,13 +51,13 @@ namespace VstsSyncMigrator.Engine
                 Trace.Write(string.Format("Attachement Export: {0} of {1} - {2}", current, sourceWIS.Count, wi.Id));
                 foreach (Attachment wia in wi.Attachments)
                 {
-                    string fname = string.Format("{0}#{1}", wi.Id, wia.Name);
+                    var fname = string.Format("{0}#{1}", wi.Id, wia.Name);
                     fname = GetSafeFilename(fname);
 
                     Trace.Write("-");
                     Trace.Write(fname);
 
-                    string fpath = Path.Combine(exportPath, fname);
+                    var fpath = Path.Combine(exportPath, fname);
                     if (!File.Exists(fpath))
                     {
                         Trace.Write("...downloading");

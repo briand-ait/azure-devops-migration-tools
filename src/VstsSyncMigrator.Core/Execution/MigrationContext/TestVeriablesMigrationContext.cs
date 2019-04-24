@@ -27,19 +27,19 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            WorkItemStoreContext sourceWisc = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
-            TestManagementContext SourceTmc = new TestManagementContext(me.Source);
+            var sourceWisc = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
+            var SourceTmc = new TestManagementContext(me.Source);
 
-            WorkItemStoreContext targetWisc = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            TestManagementContext targetTmc = new TestManagementContext(me.Target);
+            var targetWisc = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var targetTmc = new TestManagementContext(me.Target);
 
-            List<ITestVariable> sourceVars = SourceTmc.Project.TestVariables.Query().ToList();
+            var sourceVars = SourceTmc.Project.TestVariables.Query().ToList();
             Trace.WriteLine(string.Format("Plan to copy {0} Veriables?", sourceVars.Count));
 
             foreach (var sourceVar in sourceVars)
             {
                 Trace.WriteLine(string.Format("Copy: {0}", sourceVar.Name));
-                ITestVariable targetVar = GetVar(targetTmc.Project.TestVariables, sourceVar.Name);
+                var targetVar = GetVar(targetTmc.Project.TestVariables, sourceVar.Name);
                 if (targetVar == null)
                 {
                     Trace.WriteLine(string.Format("    Need to create: {0}", sourceVar.Name));
@@ -55,7 +55,7 @@ namespace VstsSyncMigrator.Engine
                 foreach (var sourceVal in sourceVar.AllowedValues)
                 {
                     Trace.WriteLine(string.Format("    Seeking: {0}", sourceVal.Value));
-                    ITestVariableValue targetVal = GetVal(targetVar, sourceVal.Value);
+                    var targetVal = GetVal(targetVar, sourceVal.Value);
                     if (targetVal == null)
                     {
                         Trace.WriteLine(string.Format("    Need to create: {0}", sourceVal.Value));

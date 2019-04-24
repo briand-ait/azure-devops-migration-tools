@@ -11,16 +11,16 @@ namespace _VstsSyncMigrator.Engine.Tests
         [TestMethod]
         public void TestEngineCreation()
         {
-            EngineConfiguration ec = EngineConfiguration.GetDefault();
-            MigrationEngine me = new MigrationEngine(ec);
+            var ec = EngineConfiguration.GetDefault();
+            var me = new MigrationEngine(ec);
         }
 
         [TestMethod]
         public void TestEngineExecuteEmptyProcessors()
         {
-            EngineConfiguration ec = EngineConfiguration.GetDefault();
+            var ec = EngineConfiguration.GetDefault();
             ec.Processors.Clear();
-            MigrationEngine me = new MigrationEngine(ec);
+            var me = new MigrationEngine(ec);
             me.Run();
 
         }
@@ -28,10 +28,10 @@ namespace _VstsSyncMigrator.Engine.Tests
         [TestMethod]
         public void TestEngineExecuteEmptyFieldMaps()
         {
-            EngineConfiguration ec = EngineConfiguration.GetDefault();
+            var ec = EngineConfiguration.GetDefault();
             ec.Processors.Clear();
             ec.FieldMaps.Clear();
-            MigrationEngine me = new MigrationEngine(ec);
+            var me = new MigrationEngine(ec);
             me.Run();
         }
 

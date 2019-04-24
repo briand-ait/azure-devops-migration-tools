@@ -31,7 +31,7 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
             var sourceGitRepoService = me.Source.Collection.GetService<GitRepositoryService>();
@@ -40,26 +40,26 @@ namespace VstsSyncMigrator.Engine
             var targetGitRepoService = me.Target.Collection.GetService<GitRepositoryService>();
             var targetGitRepos = targetGitRepoService.QueryRepositories(me.Target.Name);
 
-            WorkItemStoreContext targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            TfsQueryContext tfsqc = new TfsQueryContext(targetStore);
+            var targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var tfsqc = new TfsQueryContext(targetStore);
             tfsqc.AddParameter("TeamProject", me.Target.Name);
             tfsqc.Query = string.Format(@"SELECT [System.Id] FROM WorkItems WHERE  [System.TeamProject] = @TeamProject");
-            WorkItemCollection workitems = tfsqc.Execute();
+            var workitems = tfsqc.Execute();
             Trace.WriteLine(string.Format("Update {0} work items?", workitems.Count));
             //////////////////////////////////////////////////
-            int current = workitems.Count;
-            int count = 0;
+            var current = workitems.Count;
+            var count = 0;
             long elapsedms = 0;
-            int noteFound = 0;
+            var noteFound = 0;
             foreach (WorkItem workitem in workitems)
             {
-                Stopwatch witstopwatch = new Stopwatch();
+                var witstopwatch = new Stopwatch();
                 witstopwatch.Start();
                 workitem.Open();
-                List<ExternalLink> newEL = new List<ExternalLink>();
-                List<ExternalLink> removeEL = new List<ExternalLink>();
+                var newEL = new List<ExternalLink>();
+                var removeEL = new List<ExternalLink>();
                 Trace.WriteLine(string.Format("WI: {0}?", workitem.Id));
-                List<string> gitWits = new List<string>
+                var gitWits = new List<string>
                 {
                     "Branch",
                     "Fixed in Commit",
@@ -70,16 +70,16 @@ namespace VstsSyncMigrator.Engine
                 {
                     if (l is ExternalLink && gitWits.Contains(l.ArtifactLinkType.Name))
                     {
-                        ExternalLink el = (ExternalLink) l;
+                        var el = (ExternalLink) l;
                         //vstfs:///Git/Commit/25f94570-e3e7-4b79-ad19-4b434787fd5a%2f50477259-3058-4dff-ba4c-e8c179ec5327%2f41dd2754058348d72a6417c0615c2543b9b55535
-                        string guidbits = el.LinkedArtifactUri.Substring(el.LinkedArtifactUri.LastIndexOf('/') + 1);
-                        string[] bits = Regex.Split(guidbits, "%2f", RegexOptions.IgnoreCase);
+                        var guidbits = el.LinkedArtifactUri.Substring(el.LinkedArtifactUri.LastIndexOf('/') + 1);
+                        var bits = Regex.Split(guidbits, "%2f", RegexOptions.IgnoreCase);
                         string oldCommitId = null;
-                        string oldGitRepoId = bits[1];
+                        var oldGitRepoId = bits[1];
                         if (bits.Count() >= 3)
                         {
                             oldCommitId = $"{bits[2]}";
-                            for (int i = 3; i < bits.Count(); i++)
+                            for (var i = 3; i < bits.Count(); i++)
                             {
                                 oldCommitId += $"%2f{bits[i]}";
                             }
@@ -142,7 +142,7 @@ namespace VstsSyncMigrator.Engine
                                         break;
 
                                     default:
-                                        Trace.WriteLine(String.Format("Skipping unsupported link type {0}", l.ArtifactLinkType.Name));
+                                        Trace.WriteLine(string.Format("Skipping unsupported link type {0}", l.ArtifactLinkType.Name));
                                         break;
                                 }
 
@@ -175,7 +175,7 @@ namespace VstsSyncMigrator.Engine
                     }
                 }
                 // add and remove
-                foreach (ExternalLink eln in newEL)
+                foreach (var eln in newEL)
                 {
                     try
                     {
@@ -189,7 +189,7 @@ namespace VstsSyncMigrator.Engine
                         // eat exception as sometimes TFS thinks this is an attachment
                     }
                 }
-                foreach (ExternalLink elr in removeEL)
+                foreach (var elr in removeEL)
                 {
                     if (workitem.Links.Contains(elr))
                     {
@@ -216,8 +216,8 @@ namespace VstsSyncMigrator.Engine
                 elapsedms = elapsedms + witstopwatch.ElapsedMilliseconds;
                 current--;
                 count++;
-                TimeSpan average = new TimeSpan(0, 0, 0, 0, (int) (elapsedms / count));
-                TimeSpan remaining = new TimeSpan(0, 0, 0, 0, (int) (average.TotalMilliseconds * current));
+                var average = new TimeSpan(0, 0, 0, 0, (int) (elapsedms / count));
+                var remaining = new TimeSpan(0, 0, 0, 0, (int) (average.TotalMilliseconds * current));
                 Trace.WriteLine(string.Format("Average time of {0} per work item and {1} estimated to completion",
                     string.Format(@"{0:s\:fff} seconds", average),
                     string.Format(@"{0:%h} hours {0:%m} minutes {0:s\:fff} seconds", remaining)));

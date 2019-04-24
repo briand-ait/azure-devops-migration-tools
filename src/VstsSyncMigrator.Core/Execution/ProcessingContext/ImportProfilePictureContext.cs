@@ -42,11 +42,11 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
             string exportPath;
-            string assPath = @"C:\Users\martinh\Downloads\mugshots\mugshots"; //System.Reflection.Assembly.GetExecutingAssembly().Location;
+            var assPath = @"C:\Users\martinh\Downloads\mugshots\mugshots"; //System.Reflection.Assembly.GetExecutingAssembly().Location;
                                                                               // exportPath = Path.Combine(Path.GetDirectoryName(assPath), "export-pic");
             exportPath = assPath;
             if (!Directory.Exists(exportPath))
@@ -55,9 +55,9 @@ namespace VstsSyncMigrator.Engine
             }
             var files = Directory.GetFiles(exportPath);
             var regex = new Regex(Regex.Escape("-"));
-            foreach (string file in files)
+            foreach (var file in files)
             {
-                string ident = regex.Replace( Path.GetFileNameWithoutExtension(file),@"\",1);
+                var ident = regex.Replace( Path.GetFileNameWithoutExtension(file),@"\",1);
                 string mess;
                 if (SetProfileImage(ident, file, out mess))
                 {
@@ -83,13 +83,13 @@ namespace VstsSyncMigrator.Engine
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Need to kill all errors")]
         public bool SetProfileImage(string identity, string imagePath, out string message)
         {
-            bool ret = true;
+            var ret = true;
             message = string.Empty;
-            byte[] image = new byte[0];
+            var image = new byte[0];
 
          
 
-                TeamFoundationIdentity i = ims2.ReadIdentity(IdentitySearchFactor.AccountName, identity, MembershipQuery.Direct, ReadIdentityOptions.None);
+                var i = ims2.ReadIdentity(IdentitySearchFactor.AccountName, identity, MembershipQuery.Direct, ReadIdentityOptions.None);
 
             if (i == null)
             {
@@ -107,7 +107,7 @@ namespace VstsSyncMigrator.Engine
             {
                 try
                 {
-                    byte[] rawImage = File.ReadAllBytes(imagePath);
+                    var rawImage = File.ReadAllBytes(imagePath);
                     image = ConvertAndResizeImage(rawImage);
                 }
                 catch (Exception ex)
@@ -143,10 +143,10 @@ namespace VstsSyncMigrator.Engine
 
         public bool ClearProfileImage(string identity, out string message)
         {
-            bool ret = true;
+            var ret = true;
             message = string.Empty;
 
-            TeamFoundationIdentity i = ims2.ReadIdentity(IdentitySearchFactor.AccountName, identity, MembershipQuery.Direct, ReadIdentityOptions.None);
+            var i = ims2.ReadIdentity(IdentitySearchFactor.AccountName, identity, MembershipQuery.Direct, ReadIdentityOptions.None);
 
             if (i == null)
             {
@@ -190,10 +190,10 @@ namespace VstsSyncMigrator.Engine
             }
 
             using (var imageStream = new MemoryStream(bytes))
-            using (Image image = Image.FromStream(imageStream))
+            using (var image = Image.FromStream(imageStream))
             {
-                int width = 0x90;
-                int height = 0x90;
+                var width = 0x90;
+                var height = 0x90;
                 if (image.Height > image.Width)
                 {
                     width = (0x90 * image.Width) / image.Height;
@@ -203,16 +203,16 @@ namespace VstsSyncMigrator.Engine
                     height = (0x90 * image.Height) / image.Width;
                 }
 
-                int x = (0x90 - width) / 2;
-                int y = (0x90 - height) / 2;
-                using (Bitmap bitmap = new Bitmap(0x90, 0x90))
+                var x = (0x90 - width) / 2;
+                var y = (0x90 - height) / 2;
+                using (var bitmap = new Bitmap(0x90, 0x90))
                 {
-                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    using (var graphics = Graphics.FromImage(bitmap))
                     {
                         graphics.DrawImage(image, x, y, width, height);
                     }
 
-                    using (MemoryStream stream = new MemoryStream())
+                    using (var stream = new MemoryStream())
                     {
                         bitmap.Save(stream, ImageFormat.Png);
                         return stream.ToArray();
@@ -226,9 +226,9 @@ namespace VstsSyncMigrator.Engine
             string ldapPath = null;
             try
             {
-                DirectoryContext objContext = new DirectoryContext(
+                var objContext = new DirectoryContext(
                     DirectoryContextType.Domain, friendlyDomainName);
-                Domain objDomain = Domain.GetDomain(objContext);
+                var objDomain = Domain.GetDomain(objContext);
                 ldapPath = objDomain.Name;
             }
             catch (DirectoryServicesCOMException e)

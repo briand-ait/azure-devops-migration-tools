@@ -29,9 +29,9 @@ namespace VstsSyncMigrator.Engine
         [Obsolete("Temporary work aorund for SOAP issue https://dev.azure.com/nkdagility/migration-tools/_workitems/edit/5066")]
         string WorkAroundForSOAPError(string query, IDictionary<string, string> parameters)
         {
-            foreach (string key in parameters.Keys)
+            foreach (var key in parameters.Keys)
             {
-                string pattern = "'{0}'";
+                var pattern = "'{0}'";
                 if (IsInteger(parameters[key]))
                 {
                     pattern = "{0}";
@@ -43,7 +43,7 @@ namespace VstsSyncMigrator.Engine
 
         public bool IsInteger(string maybeInt)
         {
-            int testNumber = 0;
+            var testNumber = 0;
             //Check whether 'first' is integer
             return int.TryParse(maybeInt, out testNumber);
         }
@@ -54,7 +54,7 @@ namespace VstsSyncMigrator.Engine
             Trace.WriteLine(string.Format("TfsQueryContext: {0}: {1}", "TeamProjectCollection", storeContext.Store.TeamProjectCollection.Uri.ToString()), "TfsQueryContext");
             WorkItemCollection wc;
             var startTime = DateTime.UtcNow;
-            Stopwatch queryTimer = new Stopwatch();
+            var queryTimer = new Stopwatch();
             foreach (var item in parameters)
             {
                 Trace.WriteLine(string.Format("TfsQueryContext: {0}: {1}", item.Key, item.Value), "TfsQueryContext");

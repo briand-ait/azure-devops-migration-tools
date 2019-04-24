@@ -59,7 +59,7 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
             var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
@@ -112,7 +112,7 @@ namespace VstsSyncMigrator.Engine
                     if (sourceFolder.Path.Count(f => f == '/') == 1)
                     {
                         var targetSharedFolderRoot = (QueryFolder)parentFolder[config.SharedFolderName];
-                        QueryFolder extraFolder = (QueryFolder)targetSharedFolderRoot.FirstOrDefault(q => q.Path == requiredPath);
+                        var extraFolder = (QueryFolder)targetSharedFolderRoot.FirstOrDefault(q => q.Path == requiredPath);
                         if (extraFolder == null)
                         {
                             // we are at the root level on the first pass and need to create the extra folder for the team name
@@ -128,7 +128,7 @@ namespace VstsSyncMigrator.Engine
                 }
 
                 // check if there is a folder of the required name, using the path to make sure it is unique
-                QueryFolder targetFolder = (QueryFolder)parentFolder.FirstOrDefault(q => q.Path == requiredPath);
+                var targetFolder = (QueryFolder)parentFolder.FirstOrDefault(q => q.Path == requiredPath);
                 if (targetFolder != null)
                 {
                     Trace.WriteLine($"Skipping folder '{sourceFolder.Name}' as already exists");
@@ -142,7 +142,7 @@ namespace VstsSyncMigrator.Engine
                 }
 
                 // Process child items
-                foreach (QueryItem sub_query in sourceFolder)
+                foreach (var sub_query in sourceFolder)
                 {
                     if (sub_query.GetType() == typeof(QueryFolder))
                     {

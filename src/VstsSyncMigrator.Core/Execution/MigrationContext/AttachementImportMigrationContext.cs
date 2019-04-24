@@ -25,22 +25,22 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
-            WorkItemStoreContext targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            Project destProject = targetStore.GetProject();
+            var targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var destProject = targetStore.GetProject();
 
             Trace.WriteLine(string.Format("Found target project as {0}", destProject.Name));
 
-            List<string> files = System.IO.Directory.EnumerateFiles(exportPath).ToList<string>();
+            var files = System.IO.Directory.EnumerateFiles(exportPath).ToList<string>();
             WorkItem targetWI = null;
-            int current = files.Count;
-            int failures = 0;
-            int skipped = 0;
-            foreach (string file in files)
+            var current = files.Count;
+            var failures = 0;
+            var skipped = 0;
+            foreach (var file in files)
             {
-                string fileName = System.IO.Path.GetFileName(file);
+                var fileName = System.IO.Path.GetFileName(file);
                 try
                 {
                     var fileNameParts = fileName.Split('#');
@@ -59,7 +59,7 @@ namespace VstsSyncMigrator.Engine
                         var attachment = attachments.Where(a => a.Name == targetFileName).FirstOrDefault();
                         if (attachment == null)
                         {
-                            Attachment a = new Attachment(renamedFilePath);
+                            var a = new Attachment(renamedFilePath);
                             targetWI.Attachments.Add(a);
                             targetWI.Save();
                         }

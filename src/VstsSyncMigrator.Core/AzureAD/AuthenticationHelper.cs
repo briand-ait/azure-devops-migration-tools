@@ -17,9 +17,9 @@ namespace VstsSyncMigrator
         /// <returns>ActiveDirectoryClient for User.</returns>
         public static ActiveDirectoryClient GetActiveDirectoryClientAsUser(string tenantName)
         {
-            Uri servicePointUri = new Uri(GlobalConstants.ResourceUrl);
-            Uri serviceRoot = new Uri(servicePointUri, tenantName);
-            ActiveDirectoryClient activeDirectoryClient = new ActiveDirectoryClient(serviceRoot,
+            var servicePointUri = new Uri(GlobalConstants.ResourceUrl);
+            var serviceRoot = new Uri(servicePointUri, tenantName);
+            var activeDirectoryClient = new ActiveDirectoryClient(serviceRoot,
                 async () => await AcquireTokenAsyncForUser());
             return activeDirectoryClient;
         }
@@ -42,8 +42,8 @@ namespace VstsSyncMigrator
             if (TokenForUser == null)
             {
                 var redirectUri = new Uri("urn:ietf:wg:oauth:2.0:oob");
-                AuthenticationContext authenticationContext = new AuthenticationContext(UserModeConstants.AuthString, false);
-                AuthenticationResult userAuthnResult = await authenticationContext.AcquireTokenAsync(GlobalConstants.ResourceUrl,
+                var authenticationContext = new AuthenticationContext(UserModeConstants.AuthString, false);
+                var userAuthnResult = await authenticationContext.AcquireTokenAsync(GlobalConstants.ResourceUrl,
                     UserModeConstants.ClientId, redirectUri, new PlatformParameters(PromptBehavior.RefreshSession));
                 TokenForUser = userAuthnResult.AccessToken;
                 Trace.WriteLine("\n Welcome " + userAuthnResult.UserInfo.GivenName + " " +

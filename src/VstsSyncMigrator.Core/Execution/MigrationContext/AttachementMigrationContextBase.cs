@@ -23,7 +23,7 @@ namespace VstsSyncMigrator.Engine
         {
             if (exportPath == null)
             { 
-                string assPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                var assPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 this.exportPath = Path.Combine(Path.GetDirectoryName(assPath), "export");
                 Directory.CreateDirectory(exportPath);
             }

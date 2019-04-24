@@ -31,11 +31,11 @@ namespace VstsSyncMigrator.Engine
         {
             if (source.Fields.Contains(this.config.sourceField))
             {
-                List<string> newTags = target.Tags.Split(char.Parse(@";")).ToList();
+                var newTags = target.Tags.Split(char.Parse(@";")).ToList();
                 // to tag
                 if (source.Fields[this.config.sourceField].Value != null)
                 {
-                    string value = source.Fields[this.config.sourceField].Value.ToString();
+                    var value = source.Fields[this.config.sourceField].Value.ToString();
                     if (string.IsNullOrEmpty(config.formatExpression))
                     {
                         newTags.Add(value);

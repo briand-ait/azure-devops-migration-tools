@@ -59,7 +59,7 @@ namespace VstsSyncMigrator.Engine
         }
         public int GetReflectedWorkItemId(WorkItem wi, string reflectedWotkItemIdField)
         {
-            string rwiid = wi.Fields[reflectedWotkItemIdField].Value.ToString();
+            var rwiid = wi.Fields[reflectedWotkItemIdField].Value.ToString();
             if (Regex.IsMatch(rwiid, @"(http(s)?://)?([\w-]+\.)+[\w-]+(/[\w- ;,./?%&=]*)?"))
             {
                 return int.Parse(rwiid.Substring(rwiid.LastIndexOf(@"/") + 1));
@@ -69,7 +69,7 @@ namespace VstsSyncMigrator.Engine
 
         public WorkItem FindReflectedWorkItem(WorkItem workItemToFind, string reflectedWotkItemIdField, bool cache)
         {
-            string ReflectedWorkItemId = CreateReflectedWorkItemId(workItemToFind);
+            var ReflectedWorkItemId = CreateReflectedWorkItemId(workItemToFind);
             WorkItem found = null;
             if (foundWis.ContainsKey(workItemToFind.Id))
             {
@@ -77,8 +77,8 @@ namespace VstsSyncMigrator.Engine
             }
             if (workItemToFind.Fields.Contains(reflectedWotkItemIdField) && !string.IsNullOrEmpty( workItemToFind.Fields[reflectedWotkItemIdField]?.Value?.ToString()))
             {
-                string rwiid = workItemToFind.Fields[reflectedWotkItemIdField].Value.ToString();
-                int idToFind = GetReflectedWorkItemId(workItemToFind, reflectedWotkItemIdField);
+                var rwiid = workItemToFind.Fields[reflectedWotkItemIdField].Value.ToString();
+                var idToFind = GetReflectedWorkItemId(workItemToFind, reflectedWotkItemIdField);
                 if (idToFind == 0)
                 {
                     found = null;
@@ -117,7 +117,7 @@ namespace VstsSyncMigrator.Engine
 
             IEnumerable<WorkItem> QueryWorkItems()
             {
-                TfsQueryContext query = new TfsQueryContext(this);
+                var query = new TfsQueryContext(this);
                 query.Query = string.Format(@"SELECT [System.Id] FROM WorkItems  WHERE [System.TeamProject]=@TeamProject AND [{0}] Contains '@idToFind'", reflectedWotkItemIdField);
                 query.AddParameter("idToFind", refId.ToString());
                 query.AddParameter("TeamProject", this.targetTfs.Name);
@@ -134,7 +134,7 @@ namespace VstsSyncMigrator.Engine
 
         public WorkItem FindReflectedWorkItemByReflectedWorkItemId(string refId, string reflectedWotkItemIdField)
         {
-            TfsQueryContext query = new TfsQueryContext(this);
+            var query = new TfsQueryContext(this);
             query.Query = string.Format(@"SELECT [System.Id] FROM WorkItems  WHERE [System.TeamProject]=@TeamProject AND [{0}] = @idToFind", reflectedWotkItemIdField);
             query.AddParameter("idToFind", refId.ToString());
             query.AddParameter("TeamProject", this.targetTfs.Name);
@@ -143,7 +143,7 @@ namespace VstsSyncMigrator.Engine
 
         public WorkItem FindReflectedWorkItemByMigrationRef(string refId)
         {
-            TfsQueryContext query = new TfsQueryContext(this);
+            var query = new TfsQueryContext(this);
             query.Query = @"SELECT [System.Id] FROM WorkItems  WHERE [System.TeamProject]=@TeamProject AND [System.Description] Contains @KeyToFind";
             query.AddParameter("KeyToFind", string.Format("##REF##{0}##", refId));
             query.AddParameter("TeamProject", this.targetTfs.Name);
@@ -152,7 +152,7 @@ namespace VstsSyncMigrator.Engine
 
         public WorkItem FindReflectedWorkItemByTitle(string title)
         {
-            TfsQueryContext query = new TfsQueryContext(this);
+            var query = new TfsQueryContext(this);
             query.Query = @"SELECT [System.Id] FROM WorkItems  WHERE [System.TeamProject]=@TeamProject AND [System.Title] = @TitleToFind";
             query.AddParameter("TitleToFind", title);
             query.AddParameter("TeamProject", this.targetTfs.Name);

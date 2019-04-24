@@ -12,7 +12,7 @@ namespace VstsSyncMigrator.Commands
 
         internal static string CreateExportPath(string logPath, string CommandName)
         {
-            string exportPath = Path.Combine(logPath, CommandName);
+            var exportPath = Path.Combine(logPath, CommandName);
             if (!Directory.Exists(exportPath))
             {
                 Directory.CreateDirectory(exportPath);

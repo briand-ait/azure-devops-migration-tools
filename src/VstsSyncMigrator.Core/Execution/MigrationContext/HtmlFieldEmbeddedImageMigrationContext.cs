@@ -37,20 +37,20 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            WorkItemStoreContext targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
-            TfsQueryContext tfsqc = new TfsQueryContext(targetStore);
+            var targetStore = new WorkItemStoreContext(me.Target, WorkItemStoreFlags.BypassRules);
+            var tfsqc = new TfsQueryContext(targetStore);
             tfsqc.AddParameter("TeamProject", me.Target.Name);
             tfsqc.Query =
                 $@"SELECT [System.Id], [System.Tags] FROM WorkItems WHERE [System.TeamProject] = @TeamProject {_config.QueryBit} ORDER BY [System.ChangedDate] desc";
-            WorkItemCollection targetWIS = tfsqc.Execute();
+            var targetWIS = tfsqc.Execute();
             Trace.WriteLine($"Found {targetWIS.Count} work items...", Name);
 
             current = targetWIS.Count;
 
-            string urlForMatch = me.Source.Collection.Uri.ToString();
+            var urlForMatch = me.Source.Collection.Uri.ToString();
             if (_config.FromAnyCollection)
             {
                 var url = new Uri(me.Source.Collection.Uri.ToString());
@@ -90,29 +90,29 @@ namespace VstsSyncMigrator.Engine
          */
         private void FixHtmlAttachmentLinks(WorkItem wi, string oldTfsurl, string newTfsurl)
         {
-            bool wiUpdated = false;
-            bool hasCandidates = false;
+            var wiUpdated = false;
+            var hasCandidates = false;
 
             var oldTfsurlOppositeSchema = GetUrlWithOppositeSchema(oldTfsurl);
-            string regExSearchForImageUrl = "(?<=<img.*src=\")[^\"]*";
+            var regExSearchForImageUrl = "(?<=<img.*src=\")[^\"]*";
 
             foreach (Field field in wi.Fields)
             {
                 if (field.FieldDefinition.FieldType == FieldType.Html)
                 {
-                    MatchCollection matches = Regex.Matches((string) field.Value, regExSearchForImageUrl);
+                    var matches = Regex.Matches((string) field.Value, regExSearchForImageUrl);
 
-                    string regExSearchFileName = "(?<=FileName=)[^=]*";
+                    var regExSearchFileName = "(?<=FileName=)[^=]*";
                     foreach (Match match in matches)
                     {
                         if (match.Value.ToLower().Contains(oldTfsurl.ToLower()) || match.Value.ToLower().Contains(oldTfsurlOppositeSchema.ToLower()) || (_config.SourceServerAliases != null && _config.SourceServerAliases.Any(i => match.Value.ToLower().Contains(i.ToLower()))))
                         {                     
                             // save image locally and upload as attachment
-                            Match newFileNameMatch = Regex.Match(match.Value, regExSearchFileName);
+                            var newFileNameMatch = Regex.Match(match.Value, regExSearchFileName);
                             if (newFileNameMatch.Success)
                             {
                                 Trace.WriteLine($"field '{field.Name}' has match: {match.Value}");
-                                string fullImageFilePath = Path.GetTempPath() + newFileNameMatch.Value;
+                                var fullImageFilePath = Path.GetTempPath() + newFileNameMatch.Value;
 
                                 using (var httpClient = new HttpClient(_httpClientHandler, false))
                                 {
@@ -139,7 +139,7 @@ namespace VstsSyncMigrator.Engine
                                     throw new Exception($"Downloaded image [{fullImageFilePath}] from Work Item [{wi.Id}] Field: [{field.Name}] could not be identified as an image. Authentication issue?");
                                 }
 
-                                int attachmentIndex = wi.Attachments.Add(new Attachment(fullImageFilePath));
+                                var attachmentIndex = wi.Attachments.Add(new Attachment(fullImageFilePath));
                                 wi.Save();
 
                                 var newImageLink = wi.Attachments[attachmentIndex].Uri.ToString();

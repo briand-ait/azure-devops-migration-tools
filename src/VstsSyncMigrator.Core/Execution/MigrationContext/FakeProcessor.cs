@@ -29,18 +29,18 @@ namespace VstsSyncMigrator.Engine
 
         internal override void InternalExecute()
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             //////////////////////////////////////////////////
-            WorkItemStoreContext sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
-            TfsQueryContext tfsqc = new TfsQueryContext(sourceStore);
+            var sourceStore = new WorkItemStoreContext(me.Source, WorkItemStoreFlags.None);
+            var tfsqc = new TfsQueryContext(sourceStore);
             tfsqc.AddParameter("TeamProject", me.Source.Name);
             tfsqc.Query = @"SELECT [System.Id] FROM WorkItems WHERE  [System.TeamProject] = @TeamProject ";// AND [System.Id] = 188708 ";
-            WorkItemCollection sourceWIS = tfsqc.Execute();
+            var sourceWIS = tfsqc.Execute();
             Trace.WriteLine(string.Format("Migrate {0} work items?", sourceWIS.Count));
             //////////////////////////////////////////////////
             
-            int current = sourceWIS.Count;
+            var current = sourceWIS.Count;
             foreach (WorkItem sourceWI in sourceWIS)
             {
                 System.Threading.Thread.Sleep(10);

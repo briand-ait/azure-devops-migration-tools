@@ -31,10 +31,10 @@ namespace VstsSyncMigrator.Engine.Configuration
                                          JsonSerializer serializer)
         {
             // Load JObject from stream
-            JObject jObject = JObject.Load(reader);
+            var jObject = JObject.Load(reader);
 
             // Create target object based on JObject
-            T target = Create(objectType, jObject);
+            var target = Create(objectType, jObject);
 
             // Populate the object properties
             serializer.Populate(jObject.CreateReader(), target);
@@ -46,14 +46,14 @@ namespace VstsSyncMigrator.Engine.Configuration
                                        object value,
                                        JsonSerializer serializer)
         {
-            JToken jt = JToken.FromObject(value);
+            var jt = JToken.FromObject(value);
             if (jt.Type != JTokenType.Object)
             {
                 jt.WriteTo(writer);
             }
             else
             {
-                JObject o = (JObject)jt;
+                var o = (JObject)jt;
                 o.AddFirst(new JProperty("ObjectType", value.GetType().FullName));
                 o.WriteTo(writer);
             }

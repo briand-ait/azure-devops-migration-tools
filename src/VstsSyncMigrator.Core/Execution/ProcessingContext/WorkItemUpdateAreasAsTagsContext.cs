@@ -40,7 +40,7 @@ namespace VstsSyncMigrator.Engine
             tfsqc.AddParameter("TeamProject", me.Target.Name);
             tfsqc.AddParameter("AreaPath", config.AreaIterationPath);
             tfsqc.Query = @"SELECT [System.Id], [System.Tags] FROM WorkItems WHERE  [System.TeamProject] = @TeamProject and [System.AreaPath] under @AreaPath";
-            WorkItemCollection  workitems = tfsqc.Execute();
+            WorkItemCollection workitems = tfsqc.Execute();
             Trace.WriteLine(string.Format("Update {0} work items?", workitems.Count));
             //////////////////////////////////////////////////
             int current = workitems.Count;
@@ -50,7 +50,7 @@ namespace VstsSyncMigrator.Engine
             {
                 Stopwatch witstopwatch = new Stopwatch();
                 witstopwatch.Start();
-               
+
                 Trace.WriteLine(string.Format("{0} - Updating: {1}-{2}", current, workitem.Id, workitem.Type.Name));
                 string areaPath = workitem.AreaPath;
                 List<string> bits = new List<string>(areaPath.Split(char.Parse(@"\"))).Skip(4).ToList();
@@ -58,14 +58,13 @@ namespace VstsSyncMigrator.Engine
                 List<string> newTags = tags.Union(bits).ToList();
                 string newTagList = string.Join(";", newTags.ToArray());
                 if (newTagList != workitem.Tags)
-                { 
-                workitem.Open();
-                workitem.Tags = newTagList;
-                workitem.Save();
+                {
+                    workitem.Open();
+                    workitem.Tags = newTagList;
+                    workitem.Save();
+                }
 
-            }
-
-            witstopwatch.Stop();
+                witstopwatch.Stop();
                 elapsedms = elapsedms + witstopwatch.ElapsedMilliseconds;
                 current--;
                 count++;
